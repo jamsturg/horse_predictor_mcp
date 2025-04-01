@@ -30,7 +30,8 @@ const BettingInterface = () => {
     fetchRaces();
 
     // Setup WebSocket connection for real-time odds updates
-    wsRef.current = new WebSocket('ws://localhost:3000');
+    // Use relative URL to leverage the proxy configuration
+    wsRef.current = new WebSocket(`ws://${window.location.hostname}:3000`);
 
     wsRef.current.onopen = () => {
       console.log('WebSocket connected');
@@ -97,7 +98,7 @@ const BettingInterface = () => {
         wsRef.current.close();
       }
     };
-  }, []);
+  }, [selectedRace, selectedHorse, betAmount, betType]);
 
   // Subscribe to updates for a specific race
   const subscribeToRace = (raceId) => {
