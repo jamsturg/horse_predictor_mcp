@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # Backend API and SSE server
+  backend:
+    build:
+      context: ./src/backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - PUNTINGFORM_API_KEY=e4f5ce71-8880-4907-8a29-2b7af4a6c26a
+      - TAB_API_KEY=your_tab_api_key
+      - TAB_CLIENT_ID=horse-racing-prediction
+      - TAB_CLIENT_SECRET=your_tab_client_secret
+      - REDIS_URL=redis://redis:6379
+      - MEMORY_SERVER_URL=http://memory-server:3002
+      - SEQUENTIAL_THINKING_SERVER_URL=http://sequential-thinking-server:3003
+      - FETCH_SERVER_URL=http://fetch-server:3004
+      - FILESYSTEM_SERVER_URL=http://filesystem-server:3005
+      - MCP_CHAT_URL=http://mcp-chat:3001
+    depends_on:
+      - redis
+      - memory-server
+      - sequential-thinking-server
+      - fetch-server
+      - filesystem-server
+
+  # Frontend React application
+  frontend:
+    build:
+      context: ./src/frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  # Redis for caching and pub/sub
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  # MCP Memory Server
+  memory-server:
+    image: node:16-alpine
+    working_dir: /app
+    command: npx -y @modelcontextprotocol/server-memory
+    volumes:
+      - memory-data:/app/dist
+
+  # MCP Sequential Thinking Server
+  sequential-thinking-server:
+    image: node:16-alpine
+    working_dir: /app
+    command: npx -y @modelcontextprotocol/server-sequential-thinking
+
+  # MCP Fetch Server
+  fetch-server:
+    image: python:3.9-slim
+    working_dir: /app
+    command: pip install mcp-server-fetch && python -m mcp_server_fetch
+
+  # MCP Filesystem Server
+  filesystem-server:
+    image: node:16-alpine
+    working_dir: /app
+    command: npx -y @modelcontextprotocol/server-filesystem /data
+    volumes:
+      - filesystem-data:/data
+
+  # MCP Chat Server
+  mcp-chat:
+    image: node:16-alpine
+    working_dir: /app
+    command: npx mcp-chat --web
+    ports:
+      - "3001:3001"
+    environment:
+      - ANTHROPIC_API_KEY=your_anthropic_api_key
+    depends_on:
+      - backend
+      - memory-server
+      - sequential-thinking-server
+      - fetch-server
+      - filesystem-server
+
+volumes:
+  redis-data:
+  memory-data:
+  filesystem-data:
