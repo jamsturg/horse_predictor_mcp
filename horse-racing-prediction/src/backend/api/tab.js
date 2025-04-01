@@ -5,7 +5,7 @@ const logger = require('../utils/logger');
 class TabAPI {
   constructor() {
     this.apiKey = process.env.TAB_API_KEY;
-    this.clientId = process.env.TAB_CLIENT_ID || 'horse-racing-prediction';
+    this.clientId = process.env.TAB_CLIENT_ID;
     this.clientSecret = process.env.TAB_CLIENT_SECRET;
     this.tokenUrl = 'https://api.tab.com.au/oauth/token';
     this.wsUrl = 'wss://api.tab.com.au/racing';

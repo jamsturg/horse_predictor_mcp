@@ -55,30 +55,25 @@ router.get('/predictions', async (req, res) => {
     // Fetch race data from Puntingform API
     const races = await puntingformAPI.getRaces(req.query);
     
-    // Generate mock predictions since MCP servers are not available
-    const predictions = races.map(race => {
-      // Create mock analysis for each race
-      const analysis = {
-        raceId: race.id,
-        raceName: race.name,
-        trackName: race.track,
-        raceTime: race.startTime,
-        confidence: 0.85,
-        predictions: race.horses.map(horse => {
-          // Calculate mock probability and odds
-          const probability = Math.random() * 0.5 + 0.1; // Random probability between 0.1 and 0.6
-          return {
-            horseId: horse.id,
-            horseName: horse.name,
-            probability: probability,
-            odds: 1 / probability,
-            jockey: horse.jockey
-          };
-        }).sort((a, b) => b.probability - a.probability) // Sort by probability (highest first)
-      };
-      
-      return analysis;
-    });
+    // Process each race to generate predictions
+    const predictions = [];
+    for (const race of races) {
+      try {
+        // Store race data in memory
+        await mcpIntegration.storeRaceData(race);
+        
+        // Analyze race data to generate predictions
+        const analysis = await mcpIntegration.analyzeRace(race);
+        
+        // Save analysis to filesystem for historical reference
+        await mcpIntegration.saveToFilesystem(`predictions/${race.id}.json`, analysis);
+        
+        predictions.push(analysis);
+      } catch (raceError) {
+        console.error(`Error processing race ${race.id}:`, raceError);
+        // Continue with other races even if one fails
+      }
+    }
     
     res.json(predictions);
   } catch (error) {
