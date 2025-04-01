@@ -10,9 +10,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - PUNTINGFORM_API_KEY=e4f5ce71-8880-4907-8a29-2b7af4a6c26a
-      - TAB_CLIENT_ID=d2cf1351-c311-4585-bd3a-f7f6a73136cb
-      - TAB_CLIENT_SECRET=5a76767e-71bc-423a-ae86-281d2c503a88
+      - PUNTINGFORM_API_KEY=${PUNTINGFORM_API_KEY}
+      - TAB_CLIENT_ID=${TAB_CLIENT_ID}
+      - TAB_CLIENT_SECRET=${TAB_CLIENT_SECRET}
       - REDIS_URL=redis://redis:6379
       - MEMORY_SERVER_URL=http://memory-server:3002
       - SEQUENTIAL_THINKING_SERVER_URL=http://sequential-thinking-server:3003
@@ -79,7 +79,7 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - ANTHROPIC_API_KEY=your_anthropic_api_key
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     depends_on:
       - backend
       - memory-server

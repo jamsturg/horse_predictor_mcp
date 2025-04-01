@@ -125,6 +125,22 @@ if "%SETUP_METHOD%"=="1" (
     
     :: Build and start the services
     echo Building and starting services with Docker Compose...
+    
+    :: Export environment variables from .env for Docker Compose
+    echo Setting environment variables from .env file...
+    for /f "tokens=1,2 delims==" %%a in (.env) do (
+        set KEY=%%a
+        set VALUE=%%b
+        
+        :: Remove leading/trailing spaces
+        set KEY=!KEY: =!
+        set VALUE=!VALUE: =!
+        
+        :: Set environment variable
+        set "!KEY!=!VALUE!"
+    )
+    
+    :: Run Docker Compose with environment variables
     docker-compose up -d
     
     if %errorlevel% neq 0 (

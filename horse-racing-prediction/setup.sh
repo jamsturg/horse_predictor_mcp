@@ -105,6 +105,12 @@ if [ "$SETUP_METHOD" = "1" ]; then
     
     # Build and start the services
     echo "Building and starting services with Docker Compose..."
+    
+    # Export environment variables from .env for Docker Compose
+    echo "Setting environment variables from .env file..."
+    export $(grep -v '^#' .env | xargs)
+    
+    # Run Docker Compose with environment variables
     docker-compose up -d
     
     if [ $? -ne 0 ]; then
